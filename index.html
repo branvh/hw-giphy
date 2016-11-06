@@ -18,7 +18,7 @@
         <div class="row">
             <form action="">
                 <div class="form-group" id="gif-form">
-                    <label for="gif-input" class="col-xs-2 col-form-label">Search for new GIFs:</label>
+                    <label for="gif-input" class="col-xs-2 col-form-label" id="search-label">Search for new GIFs:</label>
                     <div class="col-xs-3">
                         <input class="form-control" type="text" placeholder="Add something!" id="gif-input">
                     </div>
@@ -96,7 +96,7 @@
                 method: 'GET'
             }).done(function(response) {
 
-            	console.log(response);
+                console.log(response);
 
                 //pass AJAX respons to enable page display updates
                 gif.displayGIF(response);
@@ -119,20 +119,36 @@
                 var text = $('<h3>').addClass('panel-header text-center');
 
                 //grab ajax obejct i's content for DOM
-                var gif = data.data[i].images.fixed_height.url;
+                var gifLive = data.data[i].images.fixed_height.url;
+                var gifStill = data.data[i].images.fixed_width_still.url;
                 var rating = 'Rating: ' + data.data[i].rating;
 
                 //update DOM updates for appending
-                img.attr('src', gif);
+                img.attr('data-animate', gifLive);
+                img.attr('data-still', gifStill);
+                img.attr('data-state', 'still');
+                img.attr('src', gifStill);
                 text.text(rating);
 
                 //add to the DOM!
-
                 element.append(img);
                 element.prepend(text);
                 target.append(element);
 
             }
+
+            gif.gifClick();
+
+        },
+        gifClick: function() {
+
+
+            $('.gif').on('click', function() {
+
+                gif.gifState($(this));
+
+
+            });
 
         },
         addGIF: function(input) {
@@ -145,6 +161,20 @@
 
             //update button list - only do refresh with new GIF
             gif.addButtons(gif.strings);
+        },
+        gifState: function(gif) {
+
+            var state = gif.attr('data-state');
+
+            if (state == 'still') {
+                gif.attr('src',gif.data('animate'));
+                gif.attr('data-state', 'animate');
+            } else {
+                gif.attr('src',gif.data('still'));
+                gif.attr('data-state', 'still');
+            }
+
+
         }
 
     }
@@ -164,12 +194,6 @@
 
     //ACTION ITEMS......
     //Stop the gifs
-
-
-    /*           ASSIGNMENT GUIDELINES
-    When the user clicks one of the still GIPHY images, the gif should animate. If the user clicks the gif again, 
-    it should stop playing.
-    */
     </script>
 </body>
 
