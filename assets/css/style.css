@@ -6,8 +6,10 @@
 }
 
 
-.gif {
+.gif-holder {
 
 	float: left;
+	margin: 10px;
+	background: grey;
 }
 

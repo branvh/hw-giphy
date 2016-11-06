@@ -5,184 +5,170 @@
     <title>Giph Bonanza</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/theme-style.css">
 </head>
 
 <body>
     <div class="container">
         <div class="jumbotron" id="button-menu">
             <div class="offset-xs-1 clearfix">
-                <div class="row" id="button-row-1"></div>
-                <div class="row" id="button-row-2"></div>
+                <div class="row" id="button-row"></div>
             </div>
         </div>
-        <aside class="row">
+        <div class="row">
             <form action="">
-                <div class="form-group">
+                <div class="form-group" id="gif-form">
                     <label for="gif-input" class="col-xs-2 col-form-label">Search for new GIFs:</label>
                     <div class="col-xs-3">
-                        <input class="form-control" type="text" value="Add something!" id="gif-input">
+                        <input class="form-control" type="text" placeholder="Add something!" id="gif-input">
                     </div>
-                    <button type="submit" class="btn btn-primary">Add GIF!</button>
+                    <button type="submit" class="btn btn-primary gif-submit">Add GIF!</button>
                 </div>
             </form>
-        </aside>
-        <div class="col-xs-8 offset-xs-1" id="gif-display">
         </div>
+        <div class="col-xs-12 offset-xs-1" id="gif-display"></div>
     </div>
     <script src='http://code.jquery.com/jquery-2.1.3.min.js'></script>
     <script type="text/javascript">
     //start program
 
     var gif = {
-            key: 'dc6zaTOxFJmzC', //api key for giphy
-            strings: ['golf', 'skateboarding', 'snowboarding', 'MMA', 'hockey', 'NFL', 'soccer', 'formula one', 'tennis', 'parkour'],
-            rating: 'pg-13',
-            limit: 10,
-            init: function(strings) {
+        key: 'dc6zaTOxFJmzC', //api key for giphy
+        strings: ['golf', 'skateboarding', 'snowboarding', 'MMA', 'hockey', 'NFL', 'soccer', 'formula one', 'tennis', 'parkour'],
+        rating: 'r',
+        limit: 10,
+        init: function(strings) {
 
-                //call add buttons...in context of the page object or whatever we call it
-                this.addButtons(strings);
+            //add buttons to page - to begin process of enabling GIPHY uploads to page
+            this.addButtons(strings);
 
-            },
-            addButtons: function(strings) {
+        },
+        addGifListener: function(element) {
 
-                for (var i = 0; i < strings.length; i++) {
+            $(element).on('click', function() {
 
-                    var element = $('<button>');
-                    element.text(strings[i]);
-                    element.addClass('btn btn-default col-xs-2');
+                //call the gif API - pass argument of text
+                gif.gifAPI($(this));
 
-                    //determine where we are appending...shooting for 5 on each row
-                    var row = Math.ceil(i / 5);
+            });
+        },
+        addButtons: function(strings) {
 
-                    var target = (row === 1) ? $('#button-row-1') : $('#button-row-2');
+            //set target and ensure it is empty
+            target = $('#button-row');
+            target.empty();
 
-                    target.append(element);
+            for (var i = 0; i < strings.length; i++) {
 
-                }
+                var element = $('<button>');
+                element.text(strings[i]);
+                element.addClass('btn btn-default col-xs-2 gif-button');
 
-            },
-            gifAPI: function(button) {
-                //set topic
-                var topic = button.text();
-                console.log(topic);
+                //determine where we are appending...shooting for 5 on each row
+                var row = Math.ceil(i / 5);
 
-                var url = 'http://api.giphy.com/v1/gifs/search';
-                url += '?' + $.param({
-                    'api_key': gif.key,
-                    'q': topic,
-                    'limit': gif.limit,
-                    'rating': gif.rating,
-                });
+                // var target = (row === 1) ? $('#button-row-1') : $('#button-row-2');
+                target.append(element);
 
+                //add event listeners
+                gif.addGifListener(element);
 
-                //done call display gif and pass it the response
-                $.ajax({
-                    url: url,
-                    method: 'GET'
-                }).done(function(response) {
-
-
-                    gif.displayGIF(response);
-
-
-
-                });
-
-
-            },
-            displayGIF: function(data) {
-
-                //set target div for data to be appended to; ensure empty first
-                var target = $('#gif-display');
-                target.empty();
-
-                //loop to add gifs
-                for (var i = 0; i < data.data.length; i++) {
-
-                    var element = $('<div>').addClass('gif-holder');
-                    var img = $('<img>').addClass('img gif');
-                    var text = $('<h3>').addClass('text-center');
-
-                    //grab ajax obejct i's content for DOM
-                    var gif = data.data[i].images.fixed_height.url;
-                    var rating = 'Rating: ' + data.data[i].rating;
-
-                    //update DOM updates for appending
-                    img.attr('src', gif);
-                    text.text(rating);
-
-                    //add to dom!
-
-                    element.append(img).append(rating);
-
-                    target.append(element);
-
-                }
-
-            }, 
-            addGIF: function (input) {
-
-            	//push input to strings on button click
-            	//then....call add butons
-            	//make label text bigger
-            	//align GIFs so a few in each row
             }
 
+        },
+        gifAPI: function(button) {
+
+            //set topic for API query
+            var topic = button.text();
+
+            var url = 'http://api.giphy.com/v1/gifs/search';
+            url += '?' + $.param({
+                'api_key': gif.key,
+                'q': topic,
+                'limit': gif.limit,
+                'rating': gif.rating,
+            });
+
+
+            //upon response, call display gif and pass it the response
+            $.ajax({
+                url: url,
+                method: 'GET'
+            }).done(function(response) {
+
+            	console.log(response);
+
+                //pass AJAX respons to enable page display updates
+                gif.displayGIF(response);
+
+            });
+
+
+        },
+        displayGIF: function(data) {
+
+            //set target div for data to be appended to; ensure empty first
+            var target = $('#gif-display');
+            target.empty();
+
+            //loop to add gifs
+            for (var i = 0; i < data.data.length; i++) {
+
+                var element = $('<div>').addClass('panel gif-holder');
+                var img = $('<img>').addClass('panel-body img gif');
+                var text = $('<h3>').addClass('panel-header text-center');
+
+                //grab ajax obejct i's content for DOM
+                var gif = data.data[i].images.fixed_height.url;
+                var rating = 'Rating: ' + data.data[i].rating;
+
+                //update DOM updates for appending
+                img.attr('src', gif);
+                text.text(rating);
+
+                //add to the DOM!
+
+                element.append(img);
+                element.prepend(text);
+                target.append(element);
+
+            }
+
+        },
+        addGIF: function(input) {
+
+            //capture value
+            var newGIF = input.val().trim();
+
+            //add to strings array
+            gif.strings.push(newGIF);
+
+            //update button list - only do refresh with new GIF
+            gif.addButtons(gif.strings);
         }
 
+    }
 
-            /*   	Add a form to your page takes the value from a user input box and adds it into your topics array. 
-    Then make a function call that takes each topic in the array remakes the buttons on the page.
-*/
+    //EVEN LISTENERS TO DRIVE PROGRAM BEHAVIOR
 
     gif.init(gif.strings);
 
     //event listener - to grab content based on button clicked
-    $('.btn').on('click', function() {
 
+    $('.gif-submit').on('click', function(e) {
 
-        //call the gif API - pass argument of text
-        gif.gifAPI($(this));
+        e.preventDefault();
+        gif.addGIF($('#gif-input'));
 
     });
 
+    //ACTION ITEMS......
+    //Stop the gifs
 
 
     /*           ASSIGNMENT GUIDELINES
-     
-     Be sure to read about these GIPHY parameters (hint, hint): 
-        * `q`
-        * `limit`
-        * `rating`
-
-    X - Before you can make any part of our site work, you need to create an array of strings, each one related 
-    to a topic that interests you. Save it to a variable called topics.
-
-    X - We chose animals for our theme, but you can make a list to your own liking.
-
-    X - Your app should take the topics in this array and create buttons in your HTML.
-
-    X - Try using a loop that appends a button for each string in the array.
-
-    When the user clicks on a button, the page should grab 10 static, non-animated gif images from the
-     GIPHY API and place them on the page.
-
     When the user clicks one of the still GIPHY images, the gif should animate. If the user clicks the gif again, 
     it should stop playing.
-
-    Under every gif, display its rating (PG, G, so on).
-
-    This data is provided by the GIPHY API.
-
-    Only once you get images displaying with button presses should you move on to the next step.
-
-    Add a form to your page takes the value from a user input box and adds it into your topics array. 
-    Then make a function call that takes each topic in the array remakes the buttons on the page.
-
-    Rejoice! You just made something really cool.
-
-
     */
     </script>
 </body>
